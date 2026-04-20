@@ -1,4 +1,17 @@
-# Gym-TORCS
+# THIS FORK'S CHANGES TO GYM-TORCS
+
+```torcs_jm_par.py``` is the main racing file used. A list of options and possible parameters can be found inside as comments.
+
+This file supports the TORCS Race Runner (different project dw) so changing how the options work could break that.
+
+```run-cars.py``` is a script to run multicar races in TORCS, using ```torcs_jm_par.py```. Changing how ports work in ```torcs_jm_par.py``` could break ```run-cars.py``` 
+
+Standard python is required (no dependencies for these two files).
+Confirmed working with Python 3.11.8.
+
+The other two additions (```snakeoil3_jm2.py``` and ```jmcncarai.py```) are not my work, they were included in the folder downloaded from IBM.
+
+# Gym-TORCS (original README)
 
 Gym-TORCS is the reinforcement learning (RL) environment in TORCS domain with OpenAI-gym-like interface.
 TORCS is the open-rource realistic car racing simulator recently used as RL benchmark task in several AI studies.

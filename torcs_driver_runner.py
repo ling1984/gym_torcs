@@ -1,6 +1,9 @@
 import argparse
 import tkinter as tk
 from tkinter import ttk
+import json
+import subprocess
+import threading
 
 ## ----------------- Input argsparse -----------------
 
@@ -13,12 +16,12 @@ from tkinter import ttk
 parser = argparse.ArgumentParser(
     prog='TORCS Driver Runner',
     description='Handles running of drivers, their lifespan and heartbeat.',)
-parser.add_argument('--driver_paths', type=list, help='The absolute paths to the driver scripts.')
-parser.add_argument('--params', type=str, help='The parameters to be passed into torcs_jm_par.py')
+parser.add_argument('--driver_paths', type=list, help='Paths to the driver scripts (.py). ')
+parser.add_argument('--parameters', type=str, help='The parameters to be passed into torcs_jm_par.py')
 
 args = parser.parse_args()
 driver_paths = args.driver_paths
-params = args.params
+params = args.parameters
 
 if not driver_paths and not params:
     print("Not enough arguments. Give either --driver_paths or --params.")
@@ -33,6 +36,24 @@ if params:
 
 
 ## ----------------- Running drivers, heartbeat, stdout -----------------
+
+def run_practice(car_index, params):
+    return subprocess.Popen(f"python torcs_jm_par.py --port 300{car_index+1} --parameters {params}")
+
+def run_race(car_index, path):
+    subprocess.run(f"python {path} --port 300{car_index+1}")
+
+
+subprocs=[]
+
+if practice_mode:
+    process = threading.Thread(target=run_practice, args=(0, params),)
+    subprocs.append(process)
+
+else:
+    for path in driver_paths:
+        process = threading.Thread(target=run_race, args=(0, path))
+        subprocs.append(process)
 
 
 
@@ -104,7 +125,7 @@ class UI:
 
         start_row=2
         for i in range(NUM_DRIVERS):
-            text = f"scr_driver_{i}"
+            text = f"scr_driver {i}"
             self._add_label(text, row=i+start_row, column=0)
             text = f"waiting..."
             sep = ttk.Separator(self.frame, orient="vertical")

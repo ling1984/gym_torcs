@@ -1,8 +1,10 @@
+
 import socket
 import sys
 import getopt
 import os
 import time
+import json
 PI= 3.14159265359
 
 data_size = 2**17
@@ -15,7 +17,7 @@ ophelp+= ' --steps, -m <#>      Maximum simulation steps. 1 sec ~ 50 steps. [100
 ophelp+= ' --episodes, -e <#>   Maximum learning episodes. [1]\n'
 ophelp+= ' --track, -t <track>  Your name for this track. Used for learning. [unknown]\n'
 ophelp+= ' --stage, -s <#>      0=warm up, 1=qualifying, 2=race, 3=unknown. [3]\n'
-ophelp+= ' --features, -f <#>   Input parameters of target_speed : int, steer_gain : int, centering_gain : float, brake_threshold : float, 6*[gear_speeds : int] (dont put brackets in the input tho), enable_traction_control : bool. [1]\n'
+ophelp+= ' --parameters, -f <#>   Input parameters of target_speed : int, steer_gain : int, centering_gain : float, brake_threshold : float, 6*[gear_speeds : int] (dont put brackets in the input tho), enable_traction_control : bool. [1]\n'
 ophelp+= ' --debug, -d          Output full telemetry.\n'
 ophelp+= ' --help, -h           Show this help.\n'
 ophelp+= ' --version, -v        Show current version.'
@@ -184,7 +186,7 @@ class Client():
         try:
             (opts, args) = getopt.getopt(sys.argv[1:], 'H:p:i:m:e:t:s:f:dhv',
                        ['host=','port=','id=','steps=',
-                        'episodes=','track=','stage=', "features=",
+                        'episodes=','track=','stage=', "parameters=",
                         'debug','help','version'])
         except getopt.error as why:
             print('getopt error: %s\n%s' % (why, usage))
@@ -210,16 +212,16 @@ class Client():
                     self.maxEpisodes= int(opt[1])
                 if opt[0] == '-m' or opt[0] == '--steps':
                     self.maxSteps= int(opt[1])
-                if opt[0] == '-f' or opt[0] == '--features':
+                if opt[0] == '-f' or opt[0] == '--parameters':
                     global TARGET_SPEED, STEER_GAIN, CENTERING_GAIN, BRAKE_THRESHOLD, GEAR_SPEEDS, ENABLE_TRACTION_CONTROL
-                    list_of_parameters= opt[1].split(',')
-                    TARGET_SPEED = int(list_of_parameters[0])
-                    print("Target speed = %d" % TARGET_SPEED)
-                    STEER_GAIN = int(list_of_parameters[1]) 
-                    CENTERING_GAIN = float(list_of_parameters[2])
-                    BRAKE_THRESHOLD = float(list_of_parameters[3]) 
-                    GEAR_SPEEDS = [int(x) for x in list_of_parameters[4:10]]
-                    ENABLE_TRACTION_CONTROL = list_of_parameters[10].lower() == 'true' 
+                    json_object=json.loads(opt[1])
+                    TARGET_SPEED = int(json_object['target_speed'])
+                    STEER_GAIN = int(json_object['steer_gain'])
+                    CENTERING_GAIN = float(json_object['centering_gain'])
+                    BRAKE_THRESHOLD = float(json_object['brake_threshold'])
+                    GEAR_SPEEDS = [int(x) for x in json_object['gear_thresholds']]
+                    ENABLE_TRACTION_CONTROL = json_object['traction_control']
+                    print(f"Running with parameters:\ntarget speed={TARGET_SPEED}\nsteer gain={STEER_GAIN}\ncentering gain={CENTERING_GAIN}\nbrake threshold={BRAKE_THRESHOLD}\ngear speeds={GEAR_SPEEDS}\ntraction control enabled={ENABLE_TRACTION_CONTROL}")
                 if opt[0] == '-v' or opt[0] == '--version':
                     print('%s %s' % (sys.argv[0], version))
                     sys.exit(0)
@@ -549,7 +551,6 @@ def drive_modular(c):
 # ================= MAIN LOOP =================
 if __name__ == "__main__":
     C = Client()
-    # print(f"Target speed = {TARGET_SPEED}")
     for step in range(C.maxSteps, 0, -1):
         C.get_servers_input()
         drive_modular(C)

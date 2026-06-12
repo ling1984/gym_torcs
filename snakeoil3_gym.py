@@ -213,8 +213,10 @@ class Client():
                     self.trackname= opt[1]
                 if opt[0] == '-s' or opt[0] == '--stage':
                     self.stage= int(opt[1])
+                ######### REQUIRED FOR RACE MODE - DO NOT CHANGE OR REMOVE #########
                 if opt[0] == '-p' or opt[0] == '--port':
                     self.port= int(opt[1])
+                ######## END OF REQUIRED #########
                 if opt[0] == '-e' or opt[0] == '--episodes':
                     self.maxEpisodes= int(opt[1])
                 if opt[0] == '-m' or opt[0] == '--steps':
@@ -230,6 +232,7 @@ class Client():
             print('Superflous input? %s\n%s' % (', '.join(args), usage))
             sys.exit(-1)
 
+    ######### REQUIRED FOR RACE MODE - DO NOT CHANGE OR REMOVE #########
     def get_servers_input(self):
         '''Server's input is stored in a ServerState object'''
         if not self.so: return
@@ -266,6 +269,7 @@ class Client():
                     sys.stderr.write("\x1b[2J\x1b[H") # Clear for steady output.
                     print(self.S)
                 break # Can now return from this function.
+    ########## END OF REQUIRED #########
 
     def respond_to_server(self):
         if not self.so: return
@@ -566,6 +570,7 @@ def drive_example(c):
 
 # ================ MAIN ================
 if __name__ == "__main__":
+    #### DO NOT HARCODE THE PORT
     C= Client()
     for step in range(C.maxSteps,0,-1):
         C.get_servers_input()

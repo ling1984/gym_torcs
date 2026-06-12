@@ -33,16 +33,20 @@ version= "20130505-2"
 
 import math
 
+
 # ================= USER CONFIGURABLE PARAMETERS =================
+
+######### REQUIRED FOR PRACTICE MODE - CAN CHANGE BUT DO NOT REMOVE #########
 TARGET_SPEED = 100  # Target speed in km/h. Increasing this makes the car go faster but may reduce stability.
 STEER_GAIN = 30     # Steering sensitivity. Higher values make the car turn more aggressively.
 CENTERING_GAIN = 0.20  # How strongly the car corrects its position toward the center of the track.
 BRAKE_THRESHOLD = 0.9  # Angle threshold for braking. Lower values brake earlier.
 GEAR_SPEEDS = [0, 20, 40, 80, 100, 180]  # Speed thresholds for gear shifting.
 ENABLE_TRACTION_CONTROL = True  # Toggle traction control system.
+######### END OF REQUIRED #########
 
-# User configerable parameters as cli input:
-# python torcs_jm_par.py -f "100,30,0.20,0.9,0,20,40,80,100,180,true"
+# User configurable parameters as cli input:
+# python torcs_jm_par.py --parameters [json data]
 
 
 # ================= HELPER FUNCTIONS =================
@@ -206,12 +210,15 @@ class Client():
                     self.trackname= opt[1]
                 if opt[0] == '-s' or opt[0] == '--stage':
                     self.stage= int(opt[1])
+                ######### REQUIRED FOR RACE MODE - DO NOT CHANGE OR REMOVE #########
                 if opt[0] == '-p' or opt[0] == '--port':
                     self.port= int(opt[1])
+                ######## END OF REQUIRED #########
                 if opt[0] == '-e' or opt[0] == '--episodes':
                     self.maxEpisodes= int(opt[1])
                 if opt[0] == '-m' or opt[0] == '--steps':
                     self.maxSteps= int(opt[1])
+                ######### REQUIRED FOR PRACTICE MODE - CAN CHANGE BUT DO NOT REMOVE #########
                 if opt[0] == '-f' or opt[0] == '--parameters':
                     global TARGET_SPEED, STEER_GAIN, CENTERING_GAIN, BRAKE_THRESHOLD, GEAR_SPEEDS, ENABLE_TRACTION_CONTROL
                     json_object=json.loads(opt[1])
@@ -222,6 +229,7 @@ class Client():
                     GEAR_SPEEDS = [int(x) for x in json_object['gear_thresholds']]
                     ENABLE_TRACTION_CONTROL = json_object['traction_control']
                     print(f"Running with parameters:\ntarget speed={TARGET_SPEED}\nsteer gain={STEER_GAIN}\ncentering gain={CENTERING_GAIN}\nbrake threshold={BRAKE_THRESHOLD}\ngear speeds={GEAR_SPEEDS}\ntraction control enabled={ENABLE_TRACTION_CONTROL}")
+                ########## END OF REQUIRED #########
                 if opt[0] == '-v' or opt[0] == '--version':
                     print('%s %s' % (sys.argv[0], version))
                     sys.exit(0)
@@ -233,6 +241,7 @@ class Client():
             print('Superflous input? %s\n%s' % (', '.join(args), usage))
             sys.exit(-1)
 
+    ######### REQUIRED FOR RACE MODE - DO NOT CHANGE OR REMOVE #########
     def get_servers_input(self):
         '''Server's input is stored in a ServerState object'''
         if not self.so: return
@@ -265,6 +274,7 @@ class Client():
                     sys.stderr.write("\x1b[2J\x1b[H") # Clear for steady output.
                     print(self.S)
                 break # Can now return from this function.
+    ########## END OF REQUIRED #########
 
     def respond_to_server(self):
         if not self.so: return
@@ -550,6 +560,7 @@ def drive_modular(c):
 
 # ================= MAIN LOOP =================
 if __name__ == "__main__":
+    #### DO NOT HARCODE THE PORT
     C = Client()
     for step in range(C.maxSteps, 0, -1):
         C.get_servers_input()
